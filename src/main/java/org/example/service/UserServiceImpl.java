@@ -1,84 +1,41 @@
 package org.example.service;
 
-
-import org.example.HibernateUtil;
+import org.example.dao.UserDAO;
+import org.example.dao.UserDAOImpl;
 import org.example.entity.User;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-
+import lombok.extern.slf4j.Slf4j;
 import java.time.LocalDateTime;
 
-public class UserServiceImpl implements UserService{
-    SessionFactory factory = HibernateUtil.getSessionFactory();
+@Slf4j
+public class UserServiceImpl implements UserService {
+    private final UserDAO userDAO = new UserDAOImpl();
 
     @Override
-    public User createUser(String name, String email, Integer age, LocalDateTime created_at) {
-        Session session = factory.openSession();
-        try {
-            session.beginTransaction();
+    public User createUser(String name, String email, Integer age, LocalDateTime createdAt) {
+        log.info("Create user: {}", name);
+        User user = new User(name, email, age, createdAt);
+        return userDAO.save(user);
+    }
 
-            User user = new User(name, email, age, created_at);
-            session.persist(user);
-            session.getTransaction().commit();
-            return user;
-        } catch (Exception e){
-            session.getTransaction().rollback();
-            throw e;
-        } finally {
-            session.close();
+    @Override
+    public User readUser(Long id) {
+        log.info("Read user: {}", id);
+        return userDAO.findById((long) id).orElse(null);
+    }
+
+    @Override
+    public void updateUser(Long id, Integer age) {
+        log.info("Update user: {}", id);
+        User user = userDAO.findById((long) id).orElse(null);
+        if (user != null) {
+            user.setAge(age);
+            userDAO.update(user);
         }
     }
 
     @Override
-    public User readUser(int id) {
-        Session session = factory.openSession();
-        try {
-            return (User) session.get(User.class, id);
-        } finally {
-            session.close();
-        }
-    }
-
-    @Override
-    public void updateUser(int id, Integer age) {
-        Session session = factory.openSession();
-        try {
-            session.beginTransaction();
-            User user = (User) session.get(User.class, id);
-            if (user != null){
-                user.setAge(age);
-                session.merge(user);
-            }
-            session.getTransaction().commit();
-        } catch (Exception e){
-            if (session.getTransaction() != null){
-                session.getTransaction().rollback();
-            }
-            throw e;
-        } finally {
-            session.close();
-        }
-    }
-
-    @Override
-    public void deleteUser(int id) {
-        Session session = factory.openSession();
-        try {
-            session.beginTransaction();
-            User user = (User) session.get(User.class, id);
-            if (user != null){
-                session.delete(user);
-            }
-            session.getTransaction().commit();
-
-        } catch (Exception e){
-            if (session.getTransaction() != null){
-                session.getTransaction().rollback();
-            }
-            throw e;
-        }
-        finally {
-            session.close();
-        }
+    public void deleteUser(Long id) {
+        log.info("Delete user: {}", id);
+        userDAO.delete((long) id);
     }
 }
