@@ -6,6 +6,7 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -16,7 +17,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "username")
+    @Column(name = "name")
     private String name;
 
     @Column(name = "email")
@@ -28,11 +29,11 @@ public class User {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    public User (String name, String email, Integer age, LocalDateTime created_at){
+    public User(String name, String email, Integer age, LocalDateTime createdAt) {
         this.name = name;
         this.email = email;
         this.age = age;
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = createdAt;
     }
 }
 
